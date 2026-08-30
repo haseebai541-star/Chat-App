@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Karein</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#075e54">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body {
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .box {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        max-width: 400px;
+    }
+    h1 { color: #075e54; margin-bottom: 10px; font-size: 26px; }
+    p { color: #666; margin-bottom: 24px; font-size: 14px; }
+    a.btn {
+        display: inline-block;
+        background: #25d366;
+        color: white;
+        padding: 14px 28px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+    }
+</style>
+</head>
+<body>
+    <div class="box">
+        <h1>💬 Chat App</h1>
+        <p>Naya chat shuru karein, phir link kisi ko bhi bhej dein — wo link kholte hi seedha aapke sath chat mein aa jayega.</p>
+        <a href="/new-chat" class="btn">Naya Chat Shuru Karein</a>
+    </div>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/service-worker.js');
+        }
+    </script>
+</body>
+</html>
