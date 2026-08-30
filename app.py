@@ -29,10 +29,8 @@ app.config['SECRET_KEY'] = 'change-this-secret-key'
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-socketio = SocketIO(app, max_http_buffer_size=50 * 1024 * 1024, cors_allowed_origins="*")  # 50MB tak files allow
+socketio = SocketIO(app, max_http_buffer_size=50 * 1024 * 1024, cors_allowed_origins="*")
 
-# Room ke andar messages temporarily yaad rakhne ke liye (server restart hone par delete ho jayenge)
-# Production ke liye database (SQLite/Postgres) use karein
 ROOM_MESSAGES = {}
 
 
@@ -43,7 +41,6 @@ def home():
 
 @app.route("/new-chat")
 def new_chat():
-    """Naya unique chat room ID bana kar us room mein le jata hai."""
     room_id = str(uuid.uuid4())[:8]
     return redirect(url_for("chat_room", room_id=room_id))
 
@@ -55,7 +52,6 @@ def chat_room(room_id):
 
 @app.route("/upload/<room_id>", methods=["POST"])
 def upload_file(room_id):
-    """Image/video/voice-note file upload karta hai aur uska URL wapas bhejta hai."""
     if 'file' not in request.files:
         return {"error": "Koi file nahi mili"}, 400
 
@@ -79,12 +75,6 @@ def on_join(data):
 
 @socketio.on('send_message')
 def on_send_message(data):
-    """
-    data = {
-        room, username, type ('text' | 'image' | 'video' | 'audio' | 'file'),
-        content (text ya file URL), filename (optional)
-    }
-    """
     room = data['room']
     message = {
         "username": data.get('username', 'Guest'),
@@ -96,4 +86,6 @@ def on_send_message(data):
     emit('receive_message', message, room=room)
 
 
- if __name__ == "__main__": port = int(os.environ.get("PORT", 5000)) socketio.run(app, debug=False, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, debug=False, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
