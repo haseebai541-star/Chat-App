@@ -96,8 +96,4 @@ def on_send_message(data):
     emit('receive_message', message, room=room)
 
 
-if __name__ == "__main__":
-    # host='0.0.0.0' zaroori hai taake mobile phone (same WiFi par) is
-    # computer ke IP address se connect ho sake, sirf localhost tak
-    # mehdood na rahe
-    socketio.run(app, debug=True, host="0.0.0.0", port=5000)
+ if __name__ == "__main__": port = int(os.environ.get("PORT", 5000)) socketio.run(app, debug=False, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
