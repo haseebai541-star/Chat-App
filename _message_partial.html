@@ -1,0 +1,34 @@
+{% set is_me = m['sender_id'] == user['id'] %}
+<div class="msg-row {{ 'me' if is_me else 'them' }}" id="msg-{{ m['id'] }}" ondblclick="openMsgMenu(event, {{ m['id'] }}, {{ 'true' if is_me else 'false' }})">
+    <div class="bubble">
+        {% if group is not none and not is_me %}
+            <div class="sender-name">{{ member_map.get(m['sender_id'], 'Unknown') }}</div>
+        {% endif %}
+        {% if m['type'] == 'text' %}
+            <div>{{ m['content'] }}</div>
+        {% elif m['type'] == 'image' and m['view_once'] and not m['viewed'] %}
+            <div id="vo-{{ m['id'] }}">
+                <div class="view-once-badge" onclick="openViewOnce({{ m['id'] }}, '{{ m['content'] }}')">📷 View Once Photo (tap to open)</div>
+            </div>
+        {% elif m['type'] == 'image' and m['view_once'] and m['viewed'] %}
+            <em class="opened-note">Photo opened</em>
+        {% elif m['type'] == 'image' %}
+            <img src="{{ m['content'] }}">
+        {% elif m['type'] == 'video' %}
+            <video src="{{ m['content'] }}" controls></video>
+        {% elif m['type'] == 'audio' %}
+            <audio src="{{ m['content'] }}" controls></audio>
+        {% elif m['type'] == 'file' %}
+            <a href="{{ m['content'] }}" target="_blank">📄 {{ m['filename'] }}</a>
+        {% endif %}
+
+        <div class="meta">
+            {{ m['timestamp'][11:16] }}
+            {% if is_me and group is none %}<span class="ticks {{ 'seen' if m['seen'] else '' }}">✓✓</span>{% endif %}
+            {% if is_me and group is not none %}
+                {% set seen_count = (seen_map.get(m['id'], [])|length) %}
+                <span class="ticks {{ 'seen' if seen_count > 0 else '' }}" onclick="showSeenBy({{ m['id'] }})" title="Seen by {{ seen_count }}">✓✓{% if seen_count %} {{ seen_count }}{% endif %}</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Group - NovaChat</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="dash-header">
+    <h2>👥 New Group</h2>
+    <div class="actions"><a href="/">Back</a></div>
+</div>
+
+<div class="dash-body">
+    {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
+
+    <form method="POST">
+        <div class="field">
+            <label>Group Name</label>
+            <input type="text" name="name" required placeholder="e.g. Family, Project Team">
+        </div>
+
+        <div class="section-title">Add members from your contacts</div>
+        {% if contacts %}
+        <div id="member-picker">
+            {% for c in contacts %}
+            <label class="member-row">
+                <input type="checkbox" name="members" value="{{ c['id'] }}">
+                {% if c['profile_pic'] %}
+                    <img class="avatar" src="/media/profiles/{{ c['profile_pic'] }}">
+                {% else %}
+                    <div class="avatar">{{ c['name'][0]|upper }}</div>
+                {% endif %}
+                <span class="name">{{ c['name'] }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--muted); font-size:14px;">You don't have any contacts yet. Start a 1-to-1 chat first, then you can add them to a group.</p>
+        {% endif %}
+
+        <button class="btn-primary" type="submit" style="margin-top:16px;">Create Group</button>
+    </form>
+</div>
+
+</body>
+</html>
