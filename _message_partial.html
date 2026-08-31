@@ -1,0 +1,29 @@
+{% set is_me = m['sender_id'] == user['id'] %}
+<div class="msg-row {{ 'me' if is_me else 'them' }}" id="msg-{{ m['id'] }}">
+    <div class="bubble">
+        {% if is_me %}<button class="delete-btn" onclick="deleteMessage({{ m['id'] }})">✕</button>{% endif %}
+
+        {% if m['type'] == 'text' %}
+            <div>{{ m['content'] }}</div>
+        {% elif m['type'] == 'image' and m['view_once'] and not m['viewed'] %}
+            <div id="vo-{{ m['id'] }}">
+                <div class="view-once-badge" onclick="openViewOnce({{ m['id'] }}, '{{ m['content'] }}')">📷 View Once Photo (tap to open)</div>
+            </div>
+        {% elif m['type'] == 'image' and m['view_once'] and m['viewed'] %}
+            <em style="font-size:12px;color:#888;">Photo opened</em>
+        {% elif m['type'] == 'image' %}
+            <img src="{{ m['content'] }}">
+        {% elif m['type'] == 'video' %}
+            <video src="{{ m['content'] }}" controls></video>
+        {% elif m['type'] == 'audio' %}
+            <audio src="{{ m['content'] }}" controls></audio>
+        {% elif m['type'] == 'file' %}
+            <a href="{{ m['content'] }}" target="_blank">📄 {{ m['filename'] }}</a>
+        {% endif %}
+
+        <div class="meta">
+            {{ m['timestamp'][11:16] }}
+            {% if is_me %}<span class="ticks {{ 'seen' if m['seen'] else '' }}">✓✓</span>{% endif %}
+        </div>
+    </div>
+</div>
