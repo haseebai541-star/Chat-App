@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chats</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="dash-header">
+    <h2>💬 Chats</h2>
+    <div class="actions">
+        {% if user['is_admin'] %}<a href="/admin">Admin</a>{% endif %}
+        <a href="/profile">Profile</a>
+        <a href="/logout">Log Out</a>
+    </div>
+</div>
+
+<div class="dash-body">
+    <div class="my-id-card">
+        <div class="label">Your Chat ID</div>
+        <div class="id-value">{{ user['id'] }}</div>
+        <div class="hint">Share this ID with someone so they can start a chat with you.</div>
+    </div>
+
+    <div class="stories-bar">
+        <div class="story-item" onclick="document.getElementById('storyInput').click()">
+            <div class="add-story-btn">+</div>
+            <div class="sname">Your Story</div>
+        </div>
+        <form id="storyForm" action="/story/upload" method="POST" enctype="multipart/form-data" style="display:none;">
+            <input type="file" name="file" id="storyInput" accept="image/*,video/*" onchange="document.getElementById('storyForm').submit()">
+        </form>
+
+        {% for s in stories %}
+        <a class="story-item" href="/story/view/{{ s['user_id'] }}" style="text-decoration:none;">
+            <div class="story-ring {{ 'seen' if s['all_seen'] else '' }}">
+                {% if s['profile_pic'] %}
+                    <img class="story-avatar" src="/media/profiles/{{ s['profile_pic'] }}">
+                {% else %}
+                    <div class="story-avatar avatar" style="background:linear-gradient(135deg,#6d28d9,#8b5cf6);">{{ s['name'][0]|upper }}</div>
+                {% endif %}
+            </div>
+            <div class="sname">{{ s['name'] }}</div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <form class="find-form" method="POST" action="/find-user">
+        <input type="text" name="chat_id" placeholder="Enter a Chat ID" required maxlength="8">
+        <button type="submit">Start Chat</button>
+    </form>
+
+    <div class="secondary-actions">
+        <a href="/create-group">➕ New Group</a>
+    </div>
+
+    {% if my_groups %}
+    <div class="section-label">Groups</div>
+    {% for g in my_groups %}
+    <a class="contact-item" href="/group/{{ g['id'] }}">
+        <div class="avatar">👥</div>
+        <div><div class="name">{{ g['name'] }}</div><div class="status">Group chat</div></div>
+    </a>
+    {% endfor %}
+    {% endif %}
+
+    <div class="section-label">Direct Chats</div>
+    {% for c in contacts %}
+    <a class="contact-item" href="/chat/{{ c['id'] }}">
+        {% if c['profile_pic'] %}
+            <img class="avatar" src="/media/profiles/{{ c['profile_pic'] }}">
+        {% else %}
+            <div class="avatar">{{ c['name'][0]|upper }}</div>
+        {% endif %}
+        <div>
+            <div class="name">{{ c['name'] }}</div>
+            <div class="status">
+                <span class="dot {% if c['id'] in online_ids %}online{% endif %}"></span>
+                {% if c['id'] in online_ids %}Online{% else %}Offline{% endif %}
+            </div>
+        </div>
+    </a>
+    {% else %}
+    <p style="color:#888; text-align:center; margin-top: 30px; font-size: 14px;">
+        No chats yet. Enter someone's Chat ID above to start.
+    </p>
+    {% endfor %}
+</div>
+
+</body>
+</html>
