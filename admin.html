@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="dash-header">
+    <h2>Admin Panel</h2>
+    <div class="actions"><a href="/">Back</a></div>
+</div>
+
+<div class="admin-wrap">
+    <div class="admin-card">
+        <div class="admin-label">Administrator</div>
+        <div style="font-weight:600; font-size:15px; margin-top:4px;">{{ admin_name }}</div>
+        <div style="color:#888; font-size:13px;">{{ admin_email }}</div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:14px;">
+        <div class="admin-card" style="flex:1;">
+            <div class="admin-label">Users</div>
+            <div class="admin-stat">{{ users|length }}</div>
+        </div>
+        <div class="admin-card" style="flex:1;">
+            <div class="admin-label">Messages</div>
+            <div class="admin-stat">{{ total_messages }}</div>
+        </div>
+    </div>
+
+    <div class="admin-card" style="font-size:12px; color:#666; line-height:1.5;">
+        Passwords are one-way encrypted (hashed) and can never be displayed as
+        plain text by this app or any properly built app — that protects
+        everyone if the database were ever exposed. Instead, you can set a
+        new password for any user below and share it with them directly.
+    </div>
+
+    <div class="section-label">All Registered Users</div>
+    {% for u in users %}
+    <div class="admin-user-row">
+        <div class="top-row">
+            <div class="info">
+                <div class="name">{{ u['name'] }} {% if u['is_admin'] %}<span class="admin-badge">Admin</span>{% endif %}</div>
+                <div class="id">{{ u['id'] }} · {{ u['email'] }}</div>
+            </div>
+            <div class="btns">
+                <a href="/admin/user/{{ u['id'] }}">View</a>
+                {% if not u['is_admin'] %}
+                <form method="POST" action="/admin/remove-user/{{ u['id'] }}" onsubmit="return confirm('Permanently remove this user and all their messages?');" style="display:inline;">
+                    <button class="btn-remove" type="submit">Remove</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        <form class="reset-pw-form" method="POST" action="/admin/set-password/{{ u['id'] }}">
+            <input type="password" name="new_password" placeholder="Set new password (min 6 chars)" minlength="6" required>
+            <button type="submit">Set</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>
