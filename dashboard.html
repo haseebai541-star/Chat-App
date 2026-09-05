@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>ChatEx</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>:root { --ink: {{ user['theme_color'] or '#111111' }}; }</style>
+</head>
+<body>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/static/service-worker.js'); }</script>
+
+<div class="dash-header">
+    <h2>ChatEx</h2>
+    <div class="actions">
+        {% if user['is_admin'] %}<a href="/admin">Admin</a>{% endif %}
+        <a href="/profile">Profile</a>
+        <a href="/logout">Log Out</a>
+    </div>
+</div>
+
+<div class="tab-bar">
+    <a class="active" href="/">Chats</a>
+    <a href="/groups">Groups</a>
+</div>
+
+<div class="dash-body">
+    <div class="my-id-card">
+        <div class="label">Your Chat ID</div>
+        <div class="id-value">{{ user['id'] }}</div>
+        <div class="hint">Share this ID with someone so they can start a chat with you.</div>
+    </div>
+
+    <div class="stories-bar">
+        <div class="story-item" onclick="document.getElementById('storyInput').click()">
+            <div class="add-story-btn">+</div>
+            <div class="sname">Your Story</div>
+        </div>
+        <form id="storyForm" action="/story/upload" method="POST" enctype="multipart/form-data" style="display:none;">
+            <input type="file" name="file" id="storyInput" accept="image/*,video/*" onchange="handleStorySelect()">
+            <input type="file" name="audio" id="storyAudioInput" accept="audio/*" style="display:none">
+        </form>
+        <div id="storySongPrompt" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:999; align-items:center; justify-content:center;">
+            <div style="background:white; border-radius:8px; padding:20px; max-width:300px; text-align:center;">
+                <p style="font-size:14px; margin-bottom:14px;">Add a background song to your status? (optional)</p>
+                <button onclick="document.getElementById('storyAudioInput').click()" style="width:100%; padding:10px; margin-bottom:8px; border:1px solid #ddd; border-radius:4px; background:white; cursor:pointer;">🎵 Choose Song</button>
+                <button onclick="submitStory()" style="width:100%; padding:10px; border:none; border-radius:4px; background:#111; color:white; cursor:pointer;">Post Status</button>
+            </div>
+        </div>
+
+        {% for s in stories %}
+        <a class="story-item" href="/story/view/{{ s['user_id'] }}" style="text-decoration:none;">
+            <div class="story-ring {{ 'seen' if s['all_seen'] else '' }}">
+                {% if s['profile_pic'] %}
+                    <img class="story-avatar" src="/media/profiles/{{ s['profile_pic'] }}">
+                {% else %}
+                    <div class="story-avatar avatar">{{ s['name'][0]|upper }}</div>
+                {% endif %}
+            </div>
+            <div class="sname">{{ s['name'] }}</div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <form class="find-form" method="POST" action="/find-user">
+        <input type="text" name="chat_id" placeholder="Enter a Chat ID" required maxlength="8">
+        <button type="submit">Start Chat</button>
+    </form>
+
+    <div class="section-label">Direct Chats</div>
+    {% for c in contacts %}
+    <a class="contact-item" href="/chat/{{ c['id'] }}">
+        {% if c['profile_pic'] %}
+            <img class="avatar" src="/media/profiles/{{ c['profile_pic'] }}">
+        {% else %}
+            <div class="avatar">{{ c['name'][0]|upper }}</div>
+        {% endif %}
+        <div>
+            <div class="name">{{ c['name'] }}</div>
+            <div class="status">
+                <span class="dot {% if c['id'] in online_ids %}online{% endif %}"></span>
+                {% if c['id'] in online_ids %}Online{% else %}Offline{% endif %}
+            </div>
+        </div>
+        {% if c['unread'] > 0 %}<span class="unread-badge">{{ c['unread'] }}</span>{% endif %}
+    </a>
+    {% else %}
+    <p style="color:#888; text-align:center; margin-top: 30px; font-size: 14px;">
+        No chats yet. Enter someone's Chat ID above to start.
+    </p>
+    {% endfor %}
+</div>
+
+<script>
+function handleStorySelect() {
+    document.getElementById('storySongPrompt').style.display = 'flex';
+}
+function submitStory() {
+    document.getElementById('storyForm').submit();
+}
+</script>
+
+</body>
+</html>
