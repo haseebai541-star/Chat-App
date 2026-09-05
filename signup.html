@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChatEx - Sign Up</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="auth-wrap">
+    <div class="auth-card">
+        <h1>ChatEx</h1>
+        <p class="sub">Create an account. You'll get a unique Chat ID to share with others.</p>
+
+        {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
+
+        <form method="POST">
+            <div class="field">
+                <label>Full Name</label>
+                <input type="text" name="name" required>
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <div style="position:relative;">
+                    <input type="password" name="password" id="pw" required minlength="6" style="padding-right:44px;">
+                    <button type="button" onclick="togglePw()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:16px;">👁</button>
+                </div>
+            </div>
+            <button class="btn-primary" type="submit">Sign Up</button>
+        </form>
+
+        <div class="switch-link">Already have an account? <a href="/login">Log In</a></div>
+    </div>
+</div>
+<script>
+function togglePw() {
+    const pw = document.getElementById('pw');
+    pw.type = pw.type === 'password' ? 'text' : 'password';
+}
+</script>
+</body>
+</html>

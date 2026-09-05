@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>ChatEx - Groups</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>:root { --ink: {{ user['theme_color'] or '#111111' }}; }</style>
+</head>
+<body>
+
+<div class="dash-header">
+    <h2>ChatEx</h2>
+    <div class="actions">
+        {% if user['is_admin'] %}<a href="/admin">Admin</a>{% endif %}
+        <a href="/profile">Profile</a>
+        <a href="/logout">Log Out</a>
+    </div>
+</div>
+
+<div class="tab-bar">
+    <a href="/">Chats</a>
+    <a class="active" href="/groups">Groups</a>
+</div>
+
+<div class="dash-body">
+    <div class="secondary-actions">
+        <a href="/create-group">+ New Group</a>
+    </div>
+    <div class="limit-note">You've created {{ created_count }} / {{ max_groups }} groups (each person can create up to {{ max_groups }}).</div>
+
+    <div class="section-label">Your Groups</div>
+    {% for g in groups %}
+    <a class="contact-item" href="/group/{{ g['id'] }}">
+        <div class="avatar">👥</div>
+        <div>
+            <div class="name">{{ g['name'] }}</div>
+            <div class="status">{% if g['creator_id'] == user['id'] %}You created this{% else %}Member{% endif %}</div>
+        </div>
+        {% if g['unread'] > 0 %}<span class="unread-badge">{{ g['unread'] }}</span>{% endif %}
+    </a>
+    {% else %}
+    <p style="color:#888; text-align:center; margin-top: 30px; font-size: 14px;">
+        No groups yet. Create one above.
+    </p>
+    {% endfor %}
+</div>
+
+</body>
+</html>
