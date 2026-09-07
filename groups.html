@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>ChatEx - Groups</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>:root { --ink: {{ user['theme_color'] or '#111111' }}; }</style>
+</head>
+<body {% if user['theme_bg'] %}style="background-image:url('/media/profiles/{{ user['theme_bg'] }}'); background-size:cover; background-attachment:fixed;"{% endif %}>
+
+<div class="dash-header">
+    <h2>ChatEx</h2>
+    <div class="actions">
+        {% if user['is_admin'] %}
+        <a href="/admin"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>Admin</a>
+        {% endif %}
+        <a href="/profile"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"></path></svg>Profile</a>
+        <a href="/logout" class="logout-btn"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Log Out</a>
+    </div>
+</div>
+
+<div class="tab-bar">
+    <a href="/">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        Chats
+    </a>
+    <a class="active" href="/groups">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        Groups
+    </a>
+</div>
+
+<div class="dash-body">
+    <div class="limit-note">You've created {{ created_count }} / {{ max_groups }} groups (each person can create up to {{ max_groups }}).</div>
+
+    <div class="section-label">Your Groups</div>
+    {% for g in groups %}
+    <a class="contact-item" href="/group/{{ g['id'] }}">
+        <div class="avatar">👥</div>
+        <div>
+            <div class="name">{{ g['name'] }}</div>
+            <div class="status">{% if g['creator_id'] == user['id'] %}You created this{% else %}Member{% endif %}</div>
+        </div>
+        {% if g['unread'] > 0 %}<span class="unread-badge">{{ g['unread'] }}</span>{% endif %}
+    </a>
+    {% else %}
+    <p style="color:#888; text-align:center; margin-top: 30px; font-size: 14px;">
+        No groups yet. Tap the + button below to create one.
+    </p>
+    {% endfor %}
+</div>
+
+<a class="fab" href="/create-group" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">+</a>
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Group</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="dash-header">
+    <h2>New Group</h2>
+    <div class="actions"><a href="/groups">Back</a></div>
+</div>
+
+<div class="dash-body">
+    {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
+
+    {% if not error or "limit" not in error %}
+    <form method="POST">
+        <div class="field">
+            <label>Group Name</label>
+            <input type="text" name="name" placeholder="e.g. Family, Project Team" required>
+        </div>
+        <div class="field">
+            <label>Add Members (their Chat IDs, separated by commas)</label>
+            <textarea name="member_ids" rows="3" placeholder="e.g. NKM39T0C, 7K2N9QAB" style="width:100%; padding:12px 14px; border:1px solid #e5e5e5; border-radius:4px; font-size:14px;"></textarea>
+        </div>
+        <button class="btn-primary" type="submit">Create Group</button>
+    </form>
+    {% endif %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>ChatEx</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#111111">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>:root { --ink: {{ user['theme_color'] or '#111111' }}; }</style>
+</head>
+<body {% if user['theme_bg'] %}style="background-image:url('/media/profiles/{{ user['theme_bg'] }}'); background-size:cover; background-attachment:fixed;"{% endif %}>
+
+<div class="dash-header">
+    <h2>ChatEx</h2>
+    <div class="actions">
+        {% if user['is_admin'] %}
+        <a href="/admin"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>Admin</a>
+        {% endif %}
+        <a href="/profile"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"></path></svg>Profile</a>
+        <a href="/logout" class="logout-btn"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Log Out</a>
+    </div>
+</div>
+
+<div class="tab-bar">
+    <a class="active" href="/">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        Chats
+    </a>
+    <a href="/groups">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        Groups
+    </a>
+</div>
+
+<div class="dash-body">
+    <div class="my-id-card">
+        <div class="label">Your Chat ID</div>
+        <div class="id-value">{{ user['id'] }}</div>
+        <div class="hint">Share this ID with someone so they can start a chat with you.</div>
+    </div>
+
+    <div class="stories-bar">
+        <div class="story-item" onclick="openFab('status')">
+            <div class="add-story-btn">+</div>
+            <div class="sname">Your Status</div>
+        </div>
+
+        {% for s in stories %}
+        <a class="story-item" href="/story/view/{{ s['user_id'] }}" style="text-decoration:none;">
+            <div class="story-ring {{ 'seen' if s['all_seen'] else '' }}">
+                {% if s['profile_pic'] %}
+                    <img class="story-avatar" src="/media/profiles/{{ s['profile_pic'] }}">
+                {% else %}
+                    <div class="story-avatar avatar">{{ s['name'][0]|upper }}</div>
+                {% endif %}
+            </div>
+            <div class="sname">{{ s['name'] }}</div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="section-label">Direct Chats</div>
+    {% for c in contacts %}
+    <a class="contact-item" href="/chat/{{ c['id'] }}">
+        {% if c['profile_pic'] %}
+            <img class="avatar" src="/media/profiles/{{ c['profile_pic'] }}">
+        {% else %}
+            <div class="avatar">{{ c['name'][0]|upper }}</div>
+        {% endif %}
+        <div>
+            <div class="name">{{ c['name'] }}</div>
+            <div class="status">
+                <span class="dot {% if c['id'] in online_ids %}online{% endif %}"></span>
+                {% if c['id'] in online_ids %}Online{% else %}Offline{% endif %}
+            </div>
+        </div>
+        {% if c['unread'] > 0 %}<span class="unread-badge">{{ c['unread'] }}</span>{% endif %}
+    </a>
+    {% else %}
+    <p style="color:#888; text-align:center; margin-top: 30px; font-size: 14px;">
+        No chats yet. Tap the + button below to start one.
+    </p>
+    {% endfor %}
+</div>
+
+<!-- Floating action button -->
+<button class="fab" onclick="openFab('menu')">+</button>
+
+<div class="fab-menu" id="fabMenu" onclick="if(event.target===this) closeFab()">
+    <div class="fab-panel" id="fabPanel">
+        <!-- Main menu -->
+        <div id="fabMainMenu">
+            <button class="close-x" onclick="closeFab()">✕</button>
+            <h3>What would you like to do?</h3>
+            <button class="secondary-actions" style="width:100%; display:block; text-align:left; padding:14px; border:1px solid var(--line); border-radius:8px; background:white; margin-bottom:10px; cursor:pointer; font-size:14px;" onclick="showPanel('newChat')">💬 Start New Chat</button>
+            <button style="width:100%; display:block; text-align:left; padding:14px; border:1px solid var(--line); border-radius:8px; background:white; cursor:pointer; font-size:14px;" onclick="showPanel('newStatus')">📸 Post a Status</button>
+        </div>
+
+        <!-- New chat panel -->
+        <div id="newChatPanel" style="display:none;">
+            <button class="close-x" onclick="closeFab()">✕</button>
+            <h3>Start New Chat</h3>
+            <form class="find-form" method="POST" action="/find-user">
+                <input type="text" name="chat_id" placeholder="Enter a Chat ID" required maxlength="8">
+                <button type="submit">Start</button>
+            </form>
+        </div>
+
+        <!-- New status panel -->
+        <div id="newStatusPanel" style="display:none;">
+            <button class="close-x" onclick="closeFab()">✕</button>
+            <h3>Post a Status</h3>
+            <button style="width:100%; padding:12px; margin-bottom:8px; border:1px solid var(--line); border-radius:8px; background:white; cursor:pointer; font-size:14px;" onclick="document.getElementById('storyInput').click()">🖼️ Photo or Video</button>
+            <button style="width:100%; padding:12px; border:1px solid var(--line); border-radius:8px; background:white; cursor:pointer; font-size:14px;" onclick="showPanel('textStatus')">🅰️ Text Status</button>
+        </div>
+
+        <!-- Text status composer -->
+        <div id="textStatusPanel" style="display:none;">
+            <button class="close-x" onclick="closeFab()">✕</button>
+            <h3>Text Status</h3>
+            <form action="/story/upload-text" method="POST">
+                <textarea name="text" rows="3" placeholder="What's on your mind?" required style="width:100%; padding:12px; border:1px solid var(--line); border-radius:8px; font-size:14px; margin-bottom:10px;"></textarea>
+                <input type="hidden" name="bg_color" id="statusBgColor" value="#111111">
+                <div class="color-swatches">
+                    {% for c in ['#111111', '#8b1e3f', '#1e3a8a', '#166534', '#7c2d12', '#4c1d95', '#0f766e', '#9d174d'] %}
+                    <div class="cs {{ 'selected' if loop.first else '' }}" style="background:{{ c }};" onclick="pickStatusColor('{{ c }}', this)"></div>
+                    {% endfor %}
+                </div>
+                <button class="btn-primary" type="submit" style="margin-top:8px;">Post Status</button>
+            </form>
+        </div>
+
+        <!-- Media status with optional song -->
+        <div id="mediaSongPanel" style="display:none;">
+            <button class="close-x" onclick="closeFab()">✕</button>
+            <p style="font-size:14px; margin-bottom:14px;">Add a background song? (optional)</p>
+            <button onclick="document.getElementById('storyAudioInput').click()" style="width:100%; padding:12px; margin-bottom:8px; border:1px solid var(--line); border-radius:8px; background:white; cursor:pointer;">🎵 Choose Song</button>
+            <button onclick="document.getElementById('storyForm').submit()" class="btn-primary" type="button">Post Status</button>
+        </div>
+    </div>
+</div>
+
+<form id="storyForm" action="/story/upload" method="POST" enctype="multipart/form-data" style="display:none;">
+    <input type="file" name="file" id="storyInput" accept="image/*,video/*" onchange="showPanel('mediaSong')">
+    <input type="file" name="audio" id="storyAudioInput" accept="audio/*" style="display:none">
+</form>
+
+<script>
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/static/service-worker.js'); }
+
+function openFab(which) {
+    document.getElementById('fabMenu').classList.add('open');
+    if (which === 'status') { showPanel('newStatus'); } else { showPanel('main'); }
+}
+function closeFab() { document.getElementById('fabMenu').classList.remove('open'); }
+function showPanel(name) {
+    document.getElementById('fabMainMenu').style.display = name === 'main' ? 'block' : 'none';
+    document.getElementById('newChatPanel').style.display = name === 'newChat' ? 'block' : 'none';
+    document.getElementById('newStatusPanel').style.display = name === 'newStatus' ? 'block' : 'none';
+    document.getElementById('textStatusPanel').style.display = name === 'textStatus' ? 'block' : 'none';
+    document.getElementById('mediaSongPanel').style.display = name === 'mediaSong' ? 'block' : 'none';
+    document.getElementById('fabMenu').classList.add('open');
+}
+function pickStatusColor(color, el) {
+    document.getElementById('statusBgColor').value = color;
+    document.querySelectorAll('#textStatusPanel .cs').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+}
+</script>
+
+</body>
+</html>
